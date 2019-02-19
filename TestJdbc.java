@@ -14,10 +14,11 @@ public class TestJdbc {
             String sql = "select * from user";
             preparedStatement = connection.prepareStatement(sql);
 
-            resultSet = preparedStatement.getResultSet();
+            resultSet = preparedStatement.executeQuery();
 
-            System.out.println(resultSet.getString("username"));
-
+            while (resultSet.next()){
+                System.out.println(resultSet.getString("name"));
+            }
             connection.close();
             preparedStatement.close();
             resultSet.close();
