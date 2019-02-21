@@ -63,10 +63,17 @@ public class LoginController {
 
     @RequestMapping("/login")
     @ResponseBody
-    public String index(String name,String password){
+    public String index(String name,String password,String callback){
         Connection connection = null;
         PreparedStatement preparedStatement = null;
         ResultSet resultSet = null;
+
+        //定义个专门判断callback的变量,callback有值就是跨流域了
+        boolean isCall = true;
+        if(callback == null || callback.trim().length()==0){
+            isCall = false;
+        }
+
 
         String concatRuselt = name+password+"".trim();
         System.out.println(concatRuselt+"***");
@@ -86,12 +93,12 @@ public class LoginController {
             //如果没有下一个结果就说明没有查询到数据
             if(!resultSet.next()){
                 Map map = new HashMap();
-                map.put("result", "NONONONO");
+                map.put("result", "none");
                 map.put("test1","hahah23");
 
                 //net.sf.json.JSONObject 将Map转换为JSON方法
                 JSONObject json = JSONObject.fromObject(map);
-                return json.toString();
+                return isCall?callback+"("+json.toString()+");":json.toString();
                 //org.json.JSONObject 将Map转换为JSON方法
                 //JSONObject json =new JSONObject(map);
             }
@@ -100,23 +107,29 @@ public class LoginController {
             /*while (resultSet.next()){
                 System.out.println(resultSet.getString("name"));
             }*/
-            connection.close();
-            preparedStatement.close();
-            resultSet.close();
+
         } catch (ClassNotFoundException e) {
             e.printStackTrace();
         } catch (SQLException e) {
             e.printStackTrace();
+        }finally {
+            try {
+                connection.close();
+                preparedStatement.close();
+                resultSet.close();
+            } catch (SQLException e) {
+                e.printStackTrace();
+            }
         }
 
         Map map = new HashMap();
-        map.put("result", "YESYES");
+        map.put("result", 200);
         map.put("name",name);
         map.put("password",password);
 
         //net.sf.json.JSONObject 将Map转换为JSON方法
         JSONObject json = JSONObject.fromObject(map);
         System.out.println(json.toString()+"-------------------");
-        return json.toString();
+        return isCall?callback+"("+json.toString()+");":json.toString();
     }
 }
